@@ -10,7 +10,7 @@ on:
     inputs:
       environment:
         type: string
-        default: DEV
+        default: dev
         required: true
 env:
   DOCKER_BUILDKIT: 1

@@ -4,6 +4,14 @@ on:
   push:
     tags:        
       - 'v*' 
+
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: string
+        default: prod
+        required: true
+
 env:
   DOCKER_IMAGE_REPO: sonct
   DOCKER_IMAGE_NAME: xd-working-trial
@@ -16,6 +24,7 @@ env:
 jobs:
   tag:
     name: Tag
+    environment: prod
     runs-on: [self-hosted, shared-k8s-runner]
     steps:
       - name: Log in to docker hub
