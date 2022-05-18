@@ -1,0 +1,49 @@
+
+name: Deploy Dev
+
+on:
+  workflow_run:
+    workflows: ["Build"]
+    branches: [main, develop, uat]
+    types: 
+      - completed
+  workflow_dispatch:
+
+env:
+  ARM_SUBSCRIPTION_ID: c50abfab-96bd-4073-99dc-d4c19c34624a
+  ARM_TENANT_ID: 7b89afeb-e11b-481b-bb80-c454a7376a39
+  ARM_CLIENT_ID: c3a4ee61-521c-4a03-b4e2-551780f6d050
+  AKS_RG: sc-devops-rg-aks
+  AKS_CLUSTER_NAME: sc-devops-aks-primary
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    name: Deploy
+    env:
+      IMAGE_TAG: latest
+      DOCKER_IMAGE_REPO: sonct
+      DOCKER_IMAGE_NAME: xd-working-trial
+      NAMESPACE: dev
+    container: sonct/k8s-deployer:latest
+    runs-on: [self-hosted, shared-k8s-runner]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set the value
+        id: step_one
+        run: |
+          echo "GITHUB_SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
+
+      - name: Deploy 
+        env:
+          SERVICE_NAME: ${{ github.event.repository.name }}
+          NAMESPACE: dev
+          HOST: xd-working-trial-dev.devopsgalaxy.com
+        run: |
+          export IMAGE_TAG=$GITHUB_SHORT_SHA
+          az login --service-principal -u $ARM_CLIENT_ID -p ${{secrets.ARM_CLIENT_SECRET}} --tenant $ARM_TENANT_ID
+          az account set --subscription $ARM_SUBSCRIPTION_ID
+          az aks get-credentials --resource-group $AKS_RG --name $AKS_CLUSTER_NAME
+          cd k8s && bash deploy.sh
+

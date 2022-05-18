@@ -1,0 +1,53 @@
+
+name: Build
+on:
+  workflow_run:
+    workflows: ["Test"]
+    branches: [main, develop, uat]
+    types: 
+      - completed
+  workflow_dispatch:
+
+env:
+  DOCKER_BUILDKIT: 1
+
+jobs:
+  set-value:
+    name: Set Value
+    runs-on: [self-hosted, shared-k8s-runner]
+    steps:
+      - name: Set the value
+        id: step_one
+        run: |
+          echo "GITHUB_SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-7`" >> $GITHUB_ENV
+
+  build-docker:
+
+    env:
+      DOCKER_IMAGE_REPO: sonct
+      DOCKER_IMAGE_NAME: xd-working-trial
+      CACHE_IMAGE: sonct/xd-working-trial:latest
+      IMAGE_TAG: latest
+      BUILD_CONTEXT: "."
+    name: Build Docker Image
+    runs-on: [self-hosted, shared-k8s-runner]
+    steps:
+      - name: Set the value
+        id: step_one
+        run: |
+          echo "GITHUB_SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Log in to docker hub
+        run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build from dockerfile xd-working-trial
+        run: |
+          docker build \
+            -f Dockerfile \
+            --cache-from $CACHE_IMAGE \
+            --tag $DOCKER_IMAGE_REPO/$DOCKER_IMAGE_NAME:$GITHUB_SHORT_SHA \
+            --build-arg BUILDKIT_INLINE_CACHE=1 \
+            $BUILD_CONTEXT
+      - name: Push to docker hub
+        run: docker push $DOCKER_IMAGE_REPO/$DOCKER_IMAGE_NAME:$GITHUB_SHORT_SHA

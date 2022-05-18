@@ -1,0 +1,38 @@
+
+name: Roll Back
+
+on:
+  workflow_dispatch:
+    inputs:
+      IMAGE_TAG:
+        type: string
+        default: latest
+        required: true
+
+env:
+  DOCKER_IMAGE_REPO: sonct
+  DOCKER_IMAGE_NAME: xd-working-trial
+  ARM_SUBSCRIPTION_ID: c50abfab-96bd-4073-99dc-d4c19c34624a
+  ARM_TENANT_ID: 7b89afeb-e11b-481b-bb80-c454a7376a39
+  ARM_CLIENT_ID: c3a4ee61-521c-4a03-b4e2-551780f6d050
+  AKS_RG: sc-devops-rg-aks
+  AKS_CLUSTER_NAME: sc-devops-aks-primary
+
+jobs:
+  rollback:
+    name: RollBack
+    env:
+      NAMESPACE: prod
+      SERVICE_NAME: ${{ github.event.repository.name }}
+      HOST: xd-working-trial.devopsgalaxy.com
+    container: sonct/k8s-deployer:latest
+    runs-on: [self-hosted, shared-k8s-runner]
+    steps:
+
+      - name: Rollback 
+        run: |
+          export IMAGE_TAG=${{ github.event.inputs.IMAGE_TAG }}
+          az login --service-principal -u $ARM_CLIENT_ID -p ${{secrets.ARM_CLIENT_SECRET}} --tenant $ARM_TENANT_ID
+          az account set --subscription $ARM_SUBSCRIPTION_ID
+          az aks get-credentials --resource-group $AKS_RG --name $AKS_CLUSTER_NAME
+          cd k8s && bash deploy.sh
