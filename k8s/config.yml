@@ -3,8 +3,4 @@ kind: ConfigMap
 metadata:
   name: $SERVICE_NAME
 data:
-  NAME: xd-working-trial
-  DB_MYSQL_USERNAME: root
-  DB_MYSQL_HOST: xd-mysql.default
-  DB_MYSQL_PORT: "3306"
-  DB_MYSQL_DATABASE: xd-working-trial
+  NAME: test

@@ -1,34 +1,41 @@
 package main
 
 import (
-	"net/http"
 	"github.com/gin-gonic/gin"
+	_ "github.com/go-sql-driver/mysql"
+	"log"
+	"os"
+	"xd_working_trial/cfg"
+	"xd_working_trial/ginServer"
+	"xd_working_trial/providers"
 )
 
-var db = make(map[string]string)
+func main() {
+	providers.BuildContainer()
+	if os.Getenv("ENVIRONMENT") == cfg.EnvironmentLocal {
+		gin.SetMode(gin.DebugMode)
+	} else {
+		gin.SetMode(gin.ReleaseMode)
+	}
 
-
-func setupRouter() *gin.Engine {
-	// Disable Console Color
-	// gin.DisableConsoleColor()
-	r := gin.Default()
-
-	// Ping test
-	r.GET("/ping", func(c *gin.Context) {
-		c.String(http.StatusOK, "pong")
-	})
-
-	// OS
-	r.GET("/os", func(c *gin.Context) {
-		c.String(http.StatusOK, "os")
-	})
-	
-
-	return r
+	log.Println("Preparing and running main application . . . !")
+	if err := run(); err != nil {
+		log.Fatalf("Running HTTP server error: %v", err)
+	}
 }
 
-func main() {
-	r := setupRouter()
-	// Listen and Server in 0.0.0.0:8080
-	r.Run(":8080")
+func run() error {
+	c := providers.GetContainer()
+	if c == nil {
+		log.Fatalf("Container hasn't been initialized yet")
+	}
+	var s ginServer.Server
+	if err := c.Invoke(func(_s ginServer.Server) { s = _s }); err != nil {
+		return err
+	}
+	if err := s.Open(); err != nil {
+		return err
+	}
+
+	return nil
 }
