@@ -12,7 +12,7 @@ RUN addgroup -g 1000 xduser \
     && adduser -u 1000 -G xduser -s /bin/sh -D xduser \
     && mkdir -p /app \
     && chown -R xduser:xduser /app 
-
+COPY --from=builder /build/statics /app/statics
 COPY --from=builder /build/xd_working_trial /app/xd_working_trial
 
 WORKDIR /app
