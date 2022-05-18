@@ -1,4 +1,4 @@
-module xd_working_trial
+module xd-working-trial
 
 go 1.18
 
