@@ -1,9 +1,5 @@
 # Note
 
-## Futrure
-- Migrate to Gitlab and Gitlab CI, or at least CI stuff
-- Source Code and 
-
 
 # 
 ```
