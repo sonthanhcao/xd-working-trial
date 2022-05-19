@@ -20,6 +20,7 @@ env:
 
 jobs:
   rollback:
+    environment: prod
     name: RollBack
     env:
       NAMESPACE: prod
