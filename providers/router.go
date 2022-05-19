@@ -17,7 +17,7 @@ func setupRouter(hs *handlers.Handlers) ginServer.GinRoutingFn {
 		{
 			info.GET("/os", hs.AppHandler.GetOSInfo())
 			info.GET("/user", hs.AppHandler.GetUserInfo())
-			// info.GET("/metric", hs.AppHandler.GetMetricInfo())
+			info.GET("/metric", hs.AppHandler.GetMetricInfo())
 		}
 	}
 }
