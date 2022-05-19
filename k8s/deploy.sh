@@ -2,6 +2,7 @@
 # APISERVER=https://kubernetes.default.svc.cluster.local
 # export KUBERNETES_SERVICE_HOST=kubernetes.default.svc.cluster.local
 # export KUBERNETES_SERVICE_PORT=443
+TIMESTAMP=$(date +%s)
 echo $IMAGE_TAG
 if [[ -z $IMAGE_TAG ]]; then
   echo "IMAGE_TAG is empty"

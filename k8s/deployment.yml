@@ -18,6 +18,7 @@ spec:
       name: $SERVICE_NAME
       labels:
         name: $SERVICE_NAME
+        timestamp: "$TIMESTAMP"
     spec:
       containers:
         - name: $SERVICE_NAME
